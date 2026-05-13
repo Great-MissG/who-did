@@ -1,15 +1,11 @@
-import os
 import streamlit as st
 import requests
 import pandas as pd
 from datetime import datetime, timezone
-from dotenv import load_dotenv
-
-load_dotenv()
 
 API_BASE = "https://isp.beans.ai/enterprise/v1/lists/status_logs"
 API_RAW = "https://isp.beans.ai/enterprise/v1/lists/items/{list_item_id}/raw_status_logs"
-AUTH = os.getenv("AUTH")
+AUTH = st.secrets["AUTH"]
 FIELDS = ["time", "type", "description", "status"]
 ROW_HEIGHT = 35
 HEADER_HEIGHT = 38
