@@ -3,8 +3,6 @@ import streamlit as st
 import requests
 
 
-load_dotenv()
-
 API_BASE = "https://isp.beans.ai/enterprise/v1/lists/status_logs"
 AUTH = os.getenv("AUTH")
 
