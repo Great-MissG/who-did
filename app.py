@@ -1,8 +1,12 @@
+import os
 import streamlit as st
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 API_BASE = "https://isp.beans.ai/enterprise/v1/lists/status_logs"
-AUTH = "Basic ZTk4NzEyNDU3Y2VkNDVlOjY1MzUzNTYyMzQzOTMxMzYzNjMxMzQzMDM0MzMzMzM4Mzg2MjY0MzM="
+AUTH = os.getenv("AUTH")
 
 st.title("Tracking Status Lookup")
 
