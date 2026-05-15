@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 API_BASE = "https://isp.beans.ai/enterprise/v1/lists/status_logs"
 API_RAW = "https://isp.beans.ai/enterprise/v1/lists/items/{list_item_id}/raw_status_logs"
@@ -11,11 +12,15 @@ ROW_HEIGHT = 35
 HEADER_HEIGHT = 38
 
 
-def ts_to_time(ms):
-    dt = datetime.fromtimestamp(ms / 1000, tz=timezone.utc).astimezone()
+def ts_to_time(ms, tz_name=None):
+    try:
+        tz = ZoneInfo(tz_name) if tz_name else timezone.utc
+    except Exception:
+        tz = timezone.utc
+    dt = datetime.fromtimestamp(ms / 1000, tz=timezone.utc).astimezone(tz)
     tz_full = dt.strftime("%Z")
     tz_abbr = tz_full if len(tz_full) <= 5 else "".join(w[0] for w in tz_full.split())
-    return dt.strftime(f"%m-%d %H:%M ") + tz_abbr
+    return dt.strftime("%m-%d %H:%M ") + tz_abbr
 
 
 def extract_rows(data):
@@ -26,7 +31,7 @@ def extract_rows(data):
                 row = {}
                 if "tsMillis" in item:
                     row["tsMillis"] = item["tsMillis"]
-                    row["time"] = ts_to_time(item["tsMillis"])
+                    row["time"] = ts_to_time(item["tsMillis"], tz_name)
                 for f in ["type", "description"]:
                     if f in item:
                         row[f] = item[f]
@@ -60,6 +65,8 @@ div[data-testid="stButton"] button:hover {
 }
 </style>
 """, unsafe_allow_html=True)
+
+tz_name = getattr(st.context, "timezone", None)
 
 st.title("Tracking Status Lookup")
 
@@ -148,6 +155,6 @@ if "df" in st.session_state:
             if deleted:
                 st.markdown("**Deleted**")
                 for d in deleted:
-                    st.markdown(f"`{ts_to_time(d['tsMillis'])}`")
+                    st.markdown(f"`{ts_to_time(d.get('tsMillis', 0), tz_name)}`")
                     if d.get("tags"):
                         st.table(pd.DataFrame(d["tags"]))
